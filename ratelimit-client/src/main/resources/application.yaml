@@ -1,0 +1,14 @@
+server:
+  port: 8082
+
+logging.:
+  level:
+    org.springframework.retry: DEBUG
+
+zuul:
+  ratelimit:
+    key-prefix: your-prefix
+    enabled: true
+    repository: JPA
+    behind-proxy: false
+    add-response-header: false
