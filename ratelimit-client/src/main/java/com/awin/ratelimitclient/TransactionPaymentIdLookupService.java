@@ -37,19 +37,24 @@ public class TransactionPaymentIdLookupService {
     }
 
     @Recover
-    public void recover(HttpClientErrorException e) {
-        // TODO: currently recovery method is not called, dunno why
-        System.out.println("Turn on circuit breaker");
-        // https://github.com/spring-projects/spring-kafka/issues/938
+    public ResponseEntity<String> recover(HttpClientErrorException e) {
+        System.out.println("Turn on circuit breaker"); // https://github.com/spring-projects/spring-kafka/issues/938
+        throw e;
     }
 
     @CustomRateLimit(id = "transaction-api", refreshInterval = 1000, limit = 3)
     @Retryable(
-            value = LimitExceedException.class,
+            include = LimitExceedException.class,
             backoff = @Backoff(delay = 1000)
     )
     public ResponseEntity<String> callWithCustomClientThrottle() {
         return rest.getForEntity("http://localhost:8080/client-throttle", String.class);
+    }
+
+    @Recover
+    public ResponseEntity<String> recover(LimitExceedException e) {
+        System.out.println("Turn on circuit breaker"); // https://github.com/spring-projects/spring-kafka/issues/938
+        throw e;
     }
 
     @GuavaRateLimit
